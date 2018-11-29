@@ -9,10 +9,11 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.telephony.TelephonyManager;
 import android.widget.TextView;
 
-public class BebActivity extends AppCompatActivity {
+public class AboutActivity extends AppCompatActivity {
 
     private final int kPermissionsRequestReadPhoneState = 0;
     private String _allowReadPhoneState;
@@ -23,7 +24,7 @@ public class BebActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_beb);
+        setContentView(R.layout.activity_about);
 
         _allowReadPhoneState = getResources().getString(R.string.allowReadPhoneState);
 
@@ -59,7 +60,7 @@ public class BebActivity extends AppCompatActivity {
                 dialogBuilder.setCancelable(true);
                 dialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        ActivityCompat.requestPermissions(BebActivity.this,
+                        ActivityCompat.requestPermissions(AboutActivity.this,
                                 new String[]{Manifest.permission.READ_PHONE_STATE},
                                 kPermissionsRequestReadPhoneState);
                     }
