@@ -53,10 +53,12 @@ android {
             dimension "version"
             versionNameSuffix "-dev"
             signingConfig signingConfigs.config
+            manifestPlaceholders = [orientation:"unspecified"]
         }
         full {
             dimension "version"
             signingConfig signingConfigs.config
+            manifestPlaceholders = [orientation:"portrait"]
         }
     }
 }
