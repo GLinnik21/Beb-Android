@@ -2,12 +2,13 @@
     <string name="app_name">BebApp</string>
     <string name="version">Version name</string>
     <string name="IMEI" translatable="false">IMEI</string>
-    <string name=""
     <string name="allowReadPhoneState">Please allow READ_PHONE_STATE permission</string>
+    <string name="first_blank_frame">First blank frame</string>
+    <string name="second_blank_frame">Second blank frame</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="title_profile">Profile</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
-    <string name="first_blank_frame">First blank frame</string>
-    <string name="second_blank_frame">Second blank frame</string>
+    <string name="title_about">About</string>
+    <string name="title_edit">Edit</string>
 </resources>
