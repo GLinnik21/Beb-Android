@@ -9,16 +9,15 @@
         android:id="@+id/profile"
         android:name="com.app.beb.bebapp.Profile"
         android:label="fragment_profile"
-        tools:layout="@layout/fragment_profile" >
-    </fragment>
+        tools:layout="@layout/fragment_profile" ><deepLink app:uri="sdapp://com.app.beb.bebapp/page/1"/></fragment>
+    <fragment
+        android:id="@+id/secondBlankFragment"
+        android:name="com.app.beb.bebapp.SecondBlankFragment"
+        android:label="fragment_second_blank"
+        tools:layout="@layout/fragment_second_blank" ><deepLink app:uri="sdapp://com.app.beb.bebapp/page/3"/></fragment>
     <fragment
         android:id="@+id/firstBlankFragment"
         android:name="com.app.beb.bebapp.FirstBlankFragment"
         android:label="fragment_first_blank"
-        tools:layout="@layout/fragment_first_blank" />
-    <fragment
-        android:id="@+id/firstBlankFragment2"
-        android:name="com.app.beb.bebapp.FirstBlankFragment"
-        android:label="fragment_first_blank"
-        tools:layout="@layout/fragment_first_blank" />
+        tools:layout="@layout/fragment_first_blank" ><deepLink app:uri="sdapp://com.app.beb.bebapp/page/2"/></fragment>
 </navigation>
