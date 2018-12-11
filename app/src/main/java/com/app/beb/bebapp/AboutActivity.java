@@ -5,6 +5,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AlertDialog;
@@ -12,6 +15,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.telephony.TelephonyManager;
 import android.widget.TextView;
+
+import java.util.Objects;
 
 public class AboutActivity extends AppCompatActivity {
 
@@ -38,6 +43,15 @@ public class AboutActivity extends AppCompatActivity {
     {
         _versionTextView = findViewById(R.id.versionTextView);
         _imeiTextView = findViewById(R.id.imeiTextView);
+
+        Toolbar toolbar = findViewById(R.id.about_toolbar);
+        setSupportActionBar(toolbar);
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowHomeEnabled(true);
+        }
     }
 
     private void getVersionNumber()

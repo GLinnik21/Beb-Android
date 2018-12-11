@@ -28,8 +28,6 @@ public class MainActivity extends AppCompatActivity implements NavController.OnN
     private Menu _menu;
     private Boolean _hideEdit = false;
 
-    public static final String kAboutMessage = "com.app.beb.bebapp.ABOUT";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,10 +68,10 @@ public class MainActivity extends AppCompatActivity implements NavController.OnN
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_about) {
             Intent intent = new Intent(this, AboutActivity.class);
-            intent.putExtra(kAboutMessage, "");
             startActivity(intent);
+            return true;
         }
-        return super.onOptionsItemSelected(item);
+        return false;
     }
 
     @Override

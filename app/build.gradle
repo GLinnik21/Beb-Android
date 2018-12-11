@@ -53,12 +53,12 @@ android {
             dimension "version"
             versionNameSuffix "-dev"
             signingConfig signingConfigs.config
-            manifestPlaceholders = [orientation:"unspecified"]
+            manifestPlaceholders = [orientation: "unspecified"]
         }
         full {
             dimension "version"
             signingConfig signingConfigs.config
-            manifestPlaceholders = [orientation:"portrait"]
+            manifestPlaceholders = [orientation: "portrait"]
         }
     }
 }
@@ -70,6 +70,7 @@ android.applicationVariants.all { variant ->
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'com.karumi:dexter:5.0.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha2'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0-alpha1'
     implementation 'com.google.android.material:material:1.0.0-alpha1'
