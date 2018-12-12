@@ -100,13 +100,14 @@ public class EditProfile extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        imageView = getActivity().findViewById(R.id.profile_imageView);
         return inflater.inflate(R.layout.fragment_edit_profile, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        imageView = getView().findViewById(R.id.profile_imageView);
 
         final int kTakePictureIndex = 0;
         final int kPickFromGalleryIndex = 1;
@@ -249,9 +250,16 @@ public class EditProfile extends Fragment {
                     @Override
                     public void onPermissionsChecked(MultiplePermissionsReport report) {
                         // check for permanent denial of any permission
-                        if (report.isAnyPermissionPermanentlyDenied()) {
-                            // show alert dialog navigating to Settings
-                            //openSettingsDialog();
+                        if (!report.areAllPermissionsGranted()) {
+                            if (report.getDeniedPermissionResponses().size() > 1) {
+                                Toast.makeText(getContext().getApplicationContext(),
+                                        "All permissions were denied!",
+                                        Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(getContext().getApplicationContext(),
+                                        String.format("%s was denied", report.getDeniedPermissionResponses().get(0).getPermissionName()),
+                                        Toast.LENGTH_SHORT).show();
+                            }
                         }
                     }
 
