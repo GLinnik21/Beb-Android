@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity implements NavController.OnN
         _navController.addOnNavigatedListener(this);
         setupWithNavController(_bottomNavigationView, _navController);
 
-        _mainToolbar = findViewById(R.id.main_toolbar);
+        _mainToolbar = findViewById(R.id.login_toolbar);
         setSupportActionBar(_mainToolbar);
     }
 
