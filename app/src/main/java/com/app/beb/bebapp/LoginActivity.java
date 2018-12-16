@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 
 import androidx.annotation.NonNull;
@@ -105,7 +106,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     public void onStart() {
         super.onStart();
         // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (mAuth.getCurrentUser() != null) {
+            goToMainActivity();
+        }
+    }
+
+    private void goToMainActivity() {
+        Intent intent = new Intent(this, MainActivity.class);
+        finish();
+        startActivity(intent);
     }
 
     private void populateAutoComplete() {
@@ -167,6 +176,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                                 // Sign in success, update UI with the signed-in user's information
                                 Log.d("STATUS", "createUserWithEmail:success");
                                 FirebaseUser user = mAuth.getCurrentUser();
+                                goToMainActivity();
                             } else {
                                 // If sign in fails, display a message to the user.
                                 Log.w("STATUS", "createUserWithEmail:failure", task.getException());
@@ -194,6 +204,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                                 // Sign in success, update UI with the signed-in user's information
                                 Log.d("STATUS", "signInWithEmail:success");
                                 FirebaseUser user = mAuth.getCurrentUser();
+                                goToMainActivity();
                             } else {
                                 // If sign in fails, display a message to the user.
                                 Log.w("STATUS", "signInWithEmail:failure", task.getException());

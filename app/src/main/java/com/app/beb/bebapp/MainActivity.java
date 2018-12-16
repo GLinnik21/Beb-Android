@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity implements NavController.OnN
     private BottomNavigationView _bottomNavigationView;
     private Menu _menu;
     private Boolean _hideEdit = false;
+    private FirebaseAuth _mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +43,8 @@ public class MainActivity extends AppCompatActivity implements NavController.OnN
 
         _mainToolbar = findViewById(R.id.login_toolbar);
         setSupportActionBar(_mainToolbar);
+
+        _mAuth = FirebaseAuth.getInstance();
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -66,10 +70,18 @@ public class MainActivity extends AppCompatActivity implements NavController.OnN
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_about) {
-            Intent intent = new Intent(this, AboutActivity.class);
-            startActivity(intent);
-            return true;
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.action_about:
+                Intent intent = new Intent(this, AboutActivity.class);
+                startActivity(intent);
+                return true;
+            case R.id.action_logout:
+                _mAuth.signOut();
+                intent = new Intent(this, LoginActivity.class);
+                finish();
+                startActivity(intent);
+                return true;
         }
         return false;
     }

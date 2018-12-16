@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.ui.NavigationUI;
 
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -25,6 +26,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -63,7 +72,21 @@ public class EditProfile extends Fragment {
 
     private static final String IMAGE_DIRECTORY = "/beb_app";
     private int GALLERY = 1, CAMERA = 2;
+
+    // GUI
+    private TextInputLayout nameTextInput;
+    private TextInputLayout surnameTextInput;
+    private TextInputLayout phoneTextInput;
+    private TextInputLayout emailTextInput;
     private ImageView imageView;
+    private FloatingActionButton okButton;
+
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private FirebaseDatabase database = FirebaseDatabase.getInstance();
+    private DatabaseReference myRef = database.getReference("users");
+    private final String userId = mAuth.getCurrentUser().getUid();
+
+    private String picURI;
 
     public EditProfile() {
         // Required empty public constructor
@@ -108,6 +131,26 @@ public class EditProfile extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         imageView = getView().findViewById(R.id.profile_imageView);
+        nameTextInput = getView().findViewById(R.id.name_textInputLayout);
+        surnameTextInput = getView().findViewById(R.id.surname_textInputLayout);
+        phoneTextInput = getView().findViewById(R.id.phone_textInputLayout);
+        emailTextInput = getView().findViewById(R.id.email_textInputLayout);
+        okButton = getView().findViewById(R.id.done_actionButton);
+
+        okButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                User user = new User();
+                user.setName(nameTextInput.getEditText().getText().toString());
+                user.setSurname(surnameTextInput.getEditText().getText().toString());
+                user.setPhone(phoneTextInput.getEditText().getText().toString());
+                if (picURI != null) {
+                }
+                myRef.child(userId).setValue(user);
+            }
+        });
+
+        emailTextInput.getEditText().setText(mAuth.getCurrentUser().getEmail());
 
         final int kTakePictureIndex = 0;
         final int kPickFromGalleryIndex = 1;
@@ -136,6 +179,35 @@ public class EditProfile extends Fragment {
                 dialog.show();
             }
         });
+
+        myRef.child(userId).addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        User value = dataSnapshot.getValue(User.class);
+
+                        if (value != null) {
+                            nameTextInput.getEditText().setText(value.getName());
+                            surnameTextInput.getEditText().setText(value.getSurname());
+                            phoneTextInput.getEditText().setText(value.getPhone());
+//                            Bitmap bitmap = null;
+//                            try {
+//                                bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), Uri.parse(value.getProfilePic()));
+//                            } catch (IOException e) {
+//                                e.printStackTrace();
+//                            }
+//                            Toast.makeText(getContext(), "Image Saved!", Toast.LENGTH_SHORT).show();
+//                            imageView.setImageBitmap(bitmap);
+                        }
+
+                        Log.d("DATABASE", "Value is: " + value);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.w("DATABASE", "Failed to read value.", error.toException());
+                    }
+                });
     }
 
     @Override
@@ -193,7 +265,7 @@ public class EditProfile extends Fragment {
                 Uri contentURI = data.getData();
                 try {
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), contentURI);
-                    String path = saveImage(bitmap);
+                    picURI = saveImage(bitmap);
                     Toast.makeText(getContext(), "Image Saved!", Toast.LENGTH_SHORT).show();
                     imageView.setImageBitmap(bitmap);
 
@@ -206,7 +278,7 @@ public class EditProfile extends Fragment {
         } else if (requestCode == CAMERA) {
             Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
             imageView.setImageBitmap(thumbnail);
-            saveImage(thumbnail);
+            picURI = saveImage(thumbnail);
             Toast.makeText(getContext(), "Image Saved!", Toast.LENGTH_SHORT).show();
         }
     }
