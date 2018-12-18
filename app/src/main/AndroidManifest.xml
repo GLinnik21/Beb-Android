@@ -29,8 +29,7 @@
             android:parentActivityName=".MainActivity"
             android:screenOrientation="${orientation}" />
         <activity
-            android:name=".LoginActivity"
-            android:label="@string/title_activity_login">
+            android:name=".LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

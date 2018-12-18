@@ -10,8 +10,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.text.MessageFormat;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -71,13 +69,13 @@ public class Profile extends Fragment implements UserManagerDataListener {
         return false;
     }
 
-    void setDataWithUser(User user) {
+    private void setDataWithUser(User user) {
         if (user != null) {
             if (user.getName() != null) {
                 nameTextView.setText(String.format("%s ", user.getName()));
             }
             if (user.getSurname() != null) {
-                nameTextView.setText(String.format("%s%s", nameTextView.getText(), user.getName()));
+                nameTextView.setText(String.format("%s%s", nameTextView.getText(), user.getSurname()));
             }
             if (user.getEmail() != null) {
                 emailTextView.setText(user.getEmail());

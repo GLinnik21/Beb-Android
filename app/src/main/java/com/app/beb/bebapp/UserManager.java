@@ -1,7 +1,9 @@
 package com.app.beb.bebapp;
 
+import android.net.Uri;
 import android.util.Log;
 
+import com.google.android.gms.tasks.OnCanceledListener;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -16,61 +18,65 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.Executor;
 
 import androidx.annotation.NonNull;
 
-public class UserManager {
+// Class to read and write to Realtime Database
+class FBUser {
+    private String name;
+    private String surname;
+    private String phone;
 
-    // Class to read and write to Realtime Database
-    private class FBUser {
-        private String name;
-        private String surname;
-        private String phone;
+    public FBUser() {
 
-        public FBUser() {
-
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getSurname() {
-            return surname;
-        }
-
-        public void setSurname(String surname) {
-            this.surname = surname;
-        }
-
-        public String getPhone() {
-            return phone;
-        }
-
-        public void setPhone(String phone) {
-            this.phone = phone;
-        }
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+}
+
+public class UserManager {
 
     // Firebase stuff
     private FirebaseAuth mAuth;
-    private StorageReference mStorageRef;
+    private FirebaseStorage mStorageRef;
     private DatabaseReference mDBRef;
 
     private User _currentUser;
 
     private UserManagerDataListener dataListener;
     private UserManagerLoginListener loginListener;
+    private UserManagerUserDataUpload dataUploadListener;
+
+    private int uploadSuccessesNeeded = 2;
+    private int currentSuccessed = 0;
 
     // Object lifecycle
     public static class UserManagerHolder {
@@ -83,18 +89,19 @@ public class UserManager {
 
     private UserManager() {
         mAuth = FirebaseAuth.getInstance();
-        mStorageRef = FirebaseStorage.getInstance().getReference().
-                getRoot().
-                child("users").
-                child(Objects.requireNonNull(mAuth.getCurrentUser()).getUid());
+        mStorageRef = FirebaseStorage.getInstance();
         mDBRef = FirebaseDatabase.getInstance().getReference("users");
+
+        if (mAuth.getCurrentUser() != null) {
+            fetchUserData();
+        }
     }
 
 
     // Public
     public void loginWithCredentials(String login, String password) {
         mAuth.signInWithEmailAndPassword(login, password)
-                .addOnCompleteListener((Executor) this, new OnCompleteListener<AuthResult>() {
+                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (loginListener != null) {
@@ -109,7 +116,7 @@ public class UserManager {
 
     public void registerWithCredentials(String login, String password) {
         mAuth.createUserWithEmailAndPassword(login, password)
-                .addOnCompleteListener((Executor) this, new OnCompleteListener<AuthResult>() {
+                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (loginListener != null) {
@@ -122,6 +129,10 @@ public class UserManager {
                 });
     }
 
+    public void logout() {
+        mAuth.signOut();
+        _currentUser = null;
+    }
 
     // Private
     private void fetchUserData() {
@@ -161,7 +172,8 @@ public class UserManager {
                     }
                 });
 
-        StorageReference profileRef = mStorageRef.child("profile.jpg");
+        StorageReference profileRef = mStorageRef.getReference(String.format("/users/%s/profile.jpg",
+                mAuth.getCurrentUser().getUid()));
         try {
             final File localFile = File.createTempFile("profile" + UUID.randomUUID(), "jpg");
             profileRef.getFile(localFile)
@@ -192,13 +204,118 @@ public class UserManager {
         }
     }
 
+    private void writeToDatabaseNewData(User user) {
+        FBUser fbUser = new FBUser();
+        fbUser.setName(user.getName());
+        fbUser.setSurname(user.getSurname());
+        fbUser.setPhone(user.getPhone());
+
+        mDBRef.child(mAuth.getCurrentUser().getUid()).setValue(fbUser)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        tryToNotifyOnUpload();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        tryToNotifyOnFailure(exception.getMessage());
+                    }
+                }).addOnCanceledListener(new OnCanceledListener() {
+            @Override
+            public void onCanceled() {
+                tryToNotifyOnFailure("Canceled");
+            }
+        });
+    }
+
+    private void writeToAuthentication(User user) {
+        if (user.getEmail() != null && !user.getEmail().isEmpty()) {
+            if (!user.getEmail().equals(_currentUser.getEmail())) {
+                mAuth.getCurrentUser().updateEmail(user.getEmail())
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                tryToNotifyOnUpload();
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.d("ERROR", e.getMessage());
+                                tryToNotifyOnFailure(e.getMessage());
+                            }
+                        });
+            }
+        }
+    }
+
+    private void writeToStorage(User user) {
+        Uri file = Uri.fromFile(new File(user.getProfilePicPath()));
+        StorageReference profileRef = mStorageRef.getReference(String.format("/users/%s/profile.jpg",
+                mAuth.getCurrentUser().getUid()));
+
+        profileRef.putFile(file)
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        tryToNotifyOnUpload();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        tryToNotifyOnFailure(exception.getMessage());
+                    }
+                })
+                .addOnCanceledListener(new OnCanceledListener() {
+                    @Override
+                    public void onCanceled() {
+                        tryToNotifyOnFailure("Canceled");
+                    }
+                });
+
+    }
+
+    private void tryToNotifyOnUpload() {
+        currentSuccessed++;
+        if (currentSuccessed == uploadSuccessesNeeded) {
+            if (dataUploadListener != null) {
+                dataUploadListener.onSuccess();
+            }
+        }
+    }
+
+    private void tryToNotifyOnFailure(String message) {
+        if (dataUploadListener != null) {
+            dataUploadListener.onFailure(message);
+        }
+    }
+
     // Accessors
     public User getCurrentUser() {
         return _currentUser;
     }
 
-    public void setCurrentUser(User currentUser) {
-        this._currentUser = currentUser;
+    public void overrideCurrentUser(User user) {
+        currentSuccessed = 0;
+        uploadSuccessesNeeded = 1;
+        if (user.getProfilePicPath() != null) {
+            if (!user.getProfilePicPath().equals(_currentUser.getProfilePicPath())) {
+                writeToStorage(user);
+                this._currentUser.setProfilePicPath(user.getProfilePicPath());
+                uploadSuccessesNeeded++;
+            }
+        }
+        writeToDatabaseNewData(user);
+
+// TODO: Implement email editing
+//        writeToAuthentication(user);
+
+        this._currentUser.setName(user.getName());
+        this._currentUser.setSurname(user.getSurname());
+        this._currentUser.setPhone(user.getPhone());
     }
 
     public void setDataListener(UserManagerDataListener dataListener) {
@@ -207,5 +324,9 @@ public class UserManager {
 
     public void setLoginListener(UserManagerLoginListener loginListener) {
         this.loginListener = loginListener;
+    }
+
+    public void setDataUploadListener(UserManagerUserDataUpload dataUploadListener) {
+        this.dataUploadListener = dataUploadListener;
     }
 }

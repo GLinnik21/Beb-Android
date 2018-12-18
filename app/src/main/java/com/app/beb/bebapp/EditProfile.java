@@ -1,22 +1,15 @@
 package com.app.beb.bebapp;
 
 import android.Manifest;
-import android.app.Dialog;
-import android.content.Context;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.icu.util.Calendar;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.ui.NavigationUI;
-
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -28,12 +21,6 @@ import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -46,30 +33,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.List;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link EditProfile.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link EditProfile#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class EditProfile extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    private OnFragmentInteractionListener mListener;
-
+public class EditProfile extends Fragment implements UserManagerUserDataUpload {
     private static final String IMAGE_DIRECTORY = "/beb_app";
     private int GALLERY = 1, CAMERA = 2;
 
@@ -77,35 +50,20 @@ public class EditProfile extends Fragment {
     private TextInputLayout nameTextInput;
     private TextInputLayout surnameTextInput;
     private TextInputLayout phoneTextInput;
-    private TextInputLayout emailTextInput;
     private ImageView imageView;
     private FloatingActionButton okButton;
 
-    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
-    private FirebaseDatabase database = FirebaseDatabase.getInstance();
-    private DatabaseReference myRef = database.getReference("users");
-    private final String userId = mAuth.getCurrentUser().getUid();
+    private ProgressDialog dialog;
 
-    private String picURI;
+    private String newPicAbsolutePath;
 
     public EditProfile() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment EditProfile.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static EditProfile newInstance(String param1, String param2) {
+    public static EditProfile newInstance() {
         EditProfile fragment = new EditProfile();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -114,10 +72,6 @@ public class EditProfile extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestMultiplePermissions();
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
@@ -134,23 +88,14 @@ public class EditProfile extends Fragment {
         nameTextInput = getView().findViewById(R.id.name_textInputLayout);
         surnameTextInput = getView().findViewById(R.id.surname_textInputLayout);
         phoneTextInput = getView().findViewById(R.id.phone_textInputLayout);
-        emailTextInput = getView().findViewById(R.id.email_textInputLayout);
         okButton = getView().findViewById(R.id.done_actionButton);
 
         okButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                User user = new User();
-                user.setName(nameTextInput.getEditText().getText().toString());
-                user.setSurname(surnameTextInput.getEditText().getText().toString());
-                user.setPhone(phoneTextInput.getEditText().getText().toString());
-                if (picURI != null) {
-                }
-                myRef.child(userId).setValue(user);
+                saveUser();
             }
         });
-
-        emailTextInput.getEditText().setText(mAuth.getCurrentUser().getEmail());
 
         final int kTakePictureIndex = 0;
         final int kPickFromGalleryIndex = 1;
@@ -180,69 +125,52 @@ public class EditProfile extends Fragment {
             }
         });
 
-        myRef.child(userId).addListenerForSingleValueEvent(
-                new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        User value = dataSnapshot.getValue(User.class);
-
-                        if (value != null) {
-                            nameTextInput.getEditText().setText(value.getName());
-                            surnameTextInput.getEditText().setText(value.getSurname());
-                            phoneTextInput.getEditText().setText(value.getPhone());
-//                            Bitmap bitmap = null;
-//                            try {
-//                                bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), Uri.parse(value.getProfilePic()));
-//                            } catch (IOException e) {
-//                                e.printStackTrace();
-//                            }
-//                            Toast.makeText(getContext(), "Image Saved!", Toast.LENGTH_SHORT).show();
-//                            imageView.setImageBitmap(bitmap);
-                        }
-
-                        Log.d("DATABASE", "Value is: " + value);
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Log.w("DATABASE", "Failed to read value.", error.toException());
-                    }
-                });
+        setDataWithUser(UserManager.getInstance().getCurrentUser());
     }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-//        if (context instanceof OnFragmentInteractionListener) {
-//            mListener = (OnFragmentInteractionListener) context;
-//        } else {
-//            throw new RuntimeException(context.toString()
-//                    + " must implement OnFragmentInteractionListener");
-//        }
+    private void setDataWithUser(User user) {
+        if (user != null) {
+            if (user.getName() != null) {
+                nameTextInput.getEditText().setText(user.getName());
+            }
+            if (user.getSurname() != null) {
+                surnameTextInput.getEditText().setText(user.getSurname());
+            }
+            if (user.getEmail() != null) {
+                phoneTextInput.getEditText().setText(user.getPhone());
+            }
+            if (user.getProfilePicPath() != null) {
+                Bitmap myBitmap = BitmapFactory.decodeFile(user.getProfilePicPath());
+                imageView.setImageBitmap(myBitmap);
+            }
+        }
     }
 
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
+    private void saveUser() {
+        User user = new User();
+        user.setName(nameTextInput.getEditText().getText().toString());
+        user.setSurname(surnameTextInput.getEditText().getText().toString());
+        user.setPhone(phoneTextInput.getEditText().getText().toString());
+        user.setProfilePicPath(newPicAbsolutePath);
+        User current = UserManager.getInstance().getCurrentUser();
+
+        Boolean changed = false;
+        changed = changed || !user.getName().equals(current.getName());
+        changed = changed || !user.getSurname().equals(current.getSurname());
+        changed = changed || !user.getPhone().equals(current.getPhone());
+        changed = changed || user.getProfilePicPath() != null;
+
+        if (changed) {
+            UserManager.getInstance().setDataUploadListener(this);
+            UserManager.getInstance().overrideCurrentUser(user);
+            dialog = ProgressDialog.show(getActivity(), "",
+                    "Loading. Please wait...", true);
+        } else {
+            Navigation.findNavController(getView()).navigateUp();
+        }
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
-    }
-
-    public void choosePhotoFromGallary() {
+    private void choosePhotoFromGallary() {
         Intent galleryIntent = new Intent(Intent.ACTION_PICK,
                 android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 
@@ -265,7 +193,7 @@ public class EditProfile extends Fragment {
                 Uri contentURI = data.getData();
                 try {
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), contentURI);
-                    picURI = saveImage(bitmap);
+                    newPicAbsolutePath = saveImage(bitmap);
                     Toast.makeText(getContext(), "Image Saved!", Toast.LENGTH_SHORT).show();
                     imageView.setImageBitmap(bitmap);
 
@@ -278,12 +206,12 @@ public class EditProfile extends Fragment {
         } else if (requestCode == CAMERA) {
             Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
             imageView.setImageBitmap(thumbnail);
-            picURI = saveImage(thumbnail);
+            newPicAbsolutePath = saveImage(thumbnail);
             Toast.makeText(getContext(), "Image Saved!", Toast.LENGTH_SHORT).show();
         }
     }
 
-    public String saveImage(Bitmap myBitmap) {
+    private String saveImage(Bitmap myBitmap) {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         myBitmap.compress(Bitmap.CompressFormat.JPEG, 90, bytes);
         File wallpaperDirectory = new File(
@@ -348,5 +276,17 @@ public class EditProfile extends Fragment {
                 })
                 .onSameThread()
                 .check();
+    }
+
+    @Override
+    public void onSuccess() {
+        dialog.dismiss();
+        Navigation.findNavController(getView()).navigateUp();
+    }
+
+    @Override
+    public void onFailure(String errorMessage) {
+        dialog.dismiss();
+        Toast.makeText(getContext().getApplicationContext(), "Some Error! ", Toast.LENGTH_SHORT).show();
     }
 }

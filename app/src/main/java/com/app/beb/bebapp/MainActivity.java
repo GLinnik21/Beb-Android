@@ -28,7 +28,6 @@ public class MainActivity extends AppCompatActivity implements NavController.OnN
     private BottomNavigationView _bottomNavigationView;
     private Menu _menu;
     private Boolean _hideEdit = false;
-    private FirebaseAuth _mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,8 +42,6 @@ public class MainActivity extends AppCompatActivity implements NavController.OnN
 
         _mainToolbar = findViewById(R.id.login_toolbar);
         setSupportActionBar(_mainToolbar);
-
-        _mAuth = FirebaseAuth.getInstance();
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -77,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements NavController.OnN
                 startActivity(intent);
                 return true;
             case R.id.action_logout:
-                _mAuth.signOut();
+                UserManager.getInstance().logout();
                 intent = new Intent(this, LoginActivity.class);
                 finish();
                 startActivity(intent);
