@@ -21,15 +21,15 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.MainActivity"
             android:screenOrientation="${orientation}"
             android:windowSoftInputMode="adjustResize"></activity>
         <activity
-            android:name=".AboutActivity"
-            android:parentActivityName=".MainActivity"
+            android:name=".ui.AboutActivity"
+            android:parentActivityName=".ui.MainActivity"
             android:screenOrientation="${orientation}" />
         <activity
-            android:name=".LoginActivity">
+            android:name=".ui.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

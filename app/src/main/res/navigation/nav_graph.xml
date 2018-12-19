@@ -7,26 +7,31 @@
 
     <fragment
         android:id="@+id/profile"
-        android:name="com.app.beb.bebapp.Profile"
+        android:name="com.app.beb.bebapp.ui.Profile"
         android:label="fragment_profile"
-        tools:layout="@layout/fragment_profile" ><deepLink app:uri="sdapp://com.app.beb.bebapp/page/1"/>
+        tools:layout="@layout/fragment_profile">
+        <deepLink app:uri="sdapp://com.app.beb.bebapp/page/1" />
         <action
             android:id="@+id/action_profile_to_editProfile"
             app:destination="@id/editProfile" />
     </fragment>
     <fragment
         android:id="@+id/secondBlankFragment"
-        android:name="com.app.beb.bebapp.SecondBlankFragment"
+        android:name="com.app.beb.bebapp.ui.ChangeLinkFragment"
         android:label="fragment_second_blank"
-        tools:layout="@layout/fragment_second_blank" ><deepLink app:uri="sdapp://com.app.beb.bebapp/page/3"/></fragment>
+        tools:layout="@layout/fragment_change_link">
+        <deepLink app:uri="sdapp://com.app.beb.bebapp/page/3" />
+    </fragment>
     <fragment
         android:id="@+id/firstBlankFragment"
-        android:name="com.app.beb.bebapp.FirstBlankFragment"
+        android:name="com.app.beb.bebapp.ui.DashboardFragment"
         android:label="fragment_first_blank"
-        tools:layout="@layout/fragment_first_blank" ><deepLink app:uri="sdapp://com.app.beb.bebapp/page/2"/></fragment>
+        tools:layout="@layout/fragment_dashboard">
+        <deepLink app:uri="sdapp://com.app.beb.bebapp/page/2" />
+    </fragment>
     <fragment
         android:id="@+id/editProfile"
-        android:name="com.app.beb.bebapp.EditProfile"
+        android:name="com.app.beb.bebapp.ui.EditProfile"
         android:label="fragment_edit_profile"
         tools:layout="@layout/fragment_edit_profile" />
 </navigation>

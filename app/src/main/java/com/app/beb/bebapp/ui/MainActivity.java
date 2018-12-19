@@ -1,4 +1,4 @@
-package com.app.beb.bebapp;
+package com.app.beb.bebapp.ui;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -6,8 +6,9 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 
+import com.app.beb.bebapp.R;
+import com.app.beb.bebapp.user_manager.UserManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.firebase.auth.FirebaseAuth;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;

@@ -1,4 +1,4 @@
-package com.app.beb.bebapp;
+package com.app.beb.bebapp.ui;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -9,12 +9,10 @@ import android.content.pm.PackageManager;
 
 import androidx.annotation.NonNull;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.app.beb.bebapp.R;
+import com.app.beb.bebapp.user_manager.UserManager;
+import com.app.beb.bebapp.user_manager.UserManagerLoginListener;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import androidx.appcompat.app.AppCompatActivity;
 

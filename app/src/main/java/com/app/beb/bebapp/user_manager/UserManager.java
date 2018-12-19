@@ -1,4 +1,4 @@
-package com.app.beb.bebapp;
+package com.app.beb.bebapp.user_manager;
 
 import android.net.Uri;
 import android.util.Log;

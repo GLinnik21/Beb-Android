@@ -1,4 +1,4 @@
-package com.app.beb.bebapp;
+package com.app.beb.bebapp.ui;
 
 import android.Manifest;
 import android.app.ProgressDialog;
@@ -19,6 +19,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.app.beb.bebapp.R;
+import com.app.beb.bebapp.user_manager.User;
+import com.app.beb.bebapp.user_manager.UserManager;
+import com.app.beb.bebapp.user_manager.UserManagerUserDataUpload;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputLayout;
 import com.karumi.dexter.Dexter;

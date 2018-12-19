@@ -1,4 +1,4 @@
-package com.app.beb.bebapp;
+package com.app.beb.bebapp.user_manager;
 
 public interface UserManagerUserDataUpload {
     void onSuccess();
