@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
 
 def keystorePropertiesFile = rootProject.file("keystore.properties")
 def keystoreProperties = new Properties()
@@ -12,7 +13,7 @@ android {
             standardOutput = stdout
         }
         def splittedArr = stdout.toString().trim().split('-')
-        return splittedArr[0] + '.' + splittedArr[1];
+        return splittedArr[0] + '.' + splittedArr[1]
     }
 
     def getVersionCode = { ->
@@ -21,7 +22,7 @@ android {
             commandLine 'git', 'rev-list', 'HEAD', '--count'
             standardOutput = stdout
         }
-        return stdout.toString().trim().toInteger();
+        return stdout.toString().trim().toInteger()
     }
     signingConfigs {
         config {
@@ -31,14 +32,14 @@ android {
             storePassword keystoreProperties['storePassword']
         }
     }
-    compileSdkVersion 27
+    compileSdkVersion 28
     defaultConfig {
         applicationId "com.app.beb.bebapp"
         minSdkVersion 23
-        targetSdkVersion 27
+        targetSdkVersion 28
         versionCode getVersionCode()
         versionName getVersionName()
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -53,10 +54,12 @@ android {
             dimension "version"
             versionNameSuffix "-dev"
             signingConfig signingConfigs.config
+            manifestPlaceholders = [orientation: "unspecified"]
         }
         full {
             dimension "version"
             signingConfig signingConfigs.config
+            manifestPlaceholders = [orientation: "portrait"]
         }
     }
 }
@@ -67,9 +70,22 @@ android.applicationVariants.all { variant ->
 }
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.android.support:appcompat-v7:27.1.1'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'com.karumi:dexter:5.0.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha2'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'com.google.android.material:material:1.1.0-alpha01'
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    androidTestImplementation 'androidx.test:runner:1.1.1-beta01'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1-beta01'
+
+    def nav_version = "1.0.0-alpha07"
+
+    implementation "android.arch.navigation:navigation-fragment:$nav_version"
+    implementation "android.arch.navigation:navigation-ui:$nav_version"
+    implementation 'com.google.firebase:firebase-auth:16.1.0'
+    implementation 'com.google.firebase:firebase-core:16.0.6'
+    implementation 'com.google.firebase:firebase-database:16.0.5'
+    implementation 'com.google.firebase:firebase-storage:16.0.5'
+    implementation 'com.google.firebase:firebase-auth:16.1.0'
 }

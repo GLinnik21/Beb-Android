@@ -5,14 +5,20 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.telephony.TelephonyManager;
 import android.widget.TextView;
 
-public class BebActivity extends AppCompatActivity {
+import java.util.Objects;
+
+public class AboutActivity extends AppCompatActivity {
 
     private final int kPermissionsRequestReadPhoneState = 0;
     private String _allowReadPhoneState;
@@ -23,7 +29,7 @@ public class BebActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_beb);
+        setContentView(R.layout.activity_about);
 
         _allowReadPhoneState = getResources().getString(R.string.allowReadPhoneState);
 
@@ -37,6 +43,15 @@ public class BebActivity extends AppCompatActivity {
     {
         _versionTextView = findViewById(R.id.versionTextView);
         _imeiTextView = findViewById(R.id.imeiTextView);
+
+        Toolbar toolbar = findViewById(R.id.about_toolbar);
+        setSupportActionBar(toolbar);
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowHomeEnabled(true);
+        }
     }
 
     private void getVersionNumber()
@@ -59,7 +74,7 @@ public class BebActivity extends AppCompatActivity {
                 dialogBuilder.setCancelable(true);
                 dialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        ActivityCompat.requestPermissions(BebActivity.this,
+                        ActivityCompat.requestPermissions(AboutActivity.this,
                                 new String[]{Manifest.permission.READ_PHONE_STATE},
                                 kPermissionsRequestReadPhoneState);
                     }
