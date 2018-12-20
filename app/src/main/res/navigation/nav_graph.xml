@@ -17,14 +17,14 @@
     </fragment>
     <fragment
         android:id="@+id/secondBlankFragment"
-        android:name="com.app.beb.bebapp.ui.ChangeLinkFragment"
+        android:name="com.app.beb.bebapp.ui.ChangeLink"
         android:label="fragment_second_blank"
         tools:layout="@layout/fragment_change_link">
         <deepLink app:uri="sdapp://com.app.beb.bebapp/page/3" />
     </fragment>
     <fragment
         android:id="@+id/firstBlankFragment"
-        android:name="com.app.beb.bebapp.ui.DashboardFragment"
+        android:name="com.app.beb.bebapp.ui.Dashboard"
         android:label="fragment_first_blank"
         tools:layout="@layout/fragment_dashboard">
         <deepLink app:uri="sdapp://com.app.beb.bebapp/page/2" />

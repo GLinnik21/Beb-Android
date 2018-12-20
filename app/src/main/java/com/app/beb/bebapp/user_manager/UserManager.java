@@ -76,7 +76,7 @@ public class UserManager {
     private UserManagerUserDataUpload dataUploadListener;
 
     private int uploadSuccessesNeeded = 2;
-    private int currentSuccessed = 0;
+    private int currentSucceeded = 0;
 
     // Object lifecycle
     public static class UserManagerHolder {
@@ -138,6 +138,7 @@ public class UserManager {
     private void fetchUserData() {
         _currentUser = new User();
         _currentUser.setEmail(mAuth.getCurrentUser().getEmail());
+        _currentUser.setId(mAuth.getUid());
 
         String userId = Objects.requireNonNull(mAuth.getCurrentUser()).getUid();
 
@@ -222,7 +223,8 @@ public class UserManager {
                     public void onFailure(@NonNull Exception exception) {
                         tryToNotifyOnFailure(exception.getMessage());
                     }
-                }).addOnCanceledListener(new OnCanceledListener() {
+                })
+                .addOnCanceledListener(new OnCanceledListener() {
             @Override
             public void onCanceled() {
                 tryToNotifyOnFailure("Canceled");
@@ -279,8 +281,8 @@ public class UserManager {
     }
 
     private void tryToNotifyOnUpload() {
-        currentSuccessed++;
-        if (currentSuccessed == uploadSuccessesNeeded) {
+        currentSucceeded++;
+        if (currentSucceeded == uploadSuccessesNeeded) {
             if (dataUploadListener != null) {
                 dataUploadListener.onSuccess();
             }
@@ -299,7 +301,7 @@ public class UserManager {
     }
 
     public void overrideCurrentUser(User user) {
-        currentSuccessed = 0;
+        currentSucceeded = 0;
         uploadSuccessesNeeded = 1;
         if (user.getProfilePicPath() != null) {
             if (!user.getProfilePicPath().equals(_currentUser.getProfilePicPath())) {
