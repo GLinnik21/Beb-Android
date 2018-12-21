@@ -9,7 +9,7 @@
         android:id="@+id/rssSourseInputDialog__editText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="http://your_sourse.xml"
+        android:hint="https://rssfeed.com"
 
         android:textSize="16sp"/>
 

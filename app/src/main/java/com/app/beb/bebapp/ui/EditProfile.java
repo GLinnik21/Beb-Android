@@ -1,6 +1,7 @@
 package com.app.beb.bebapp.ui;
 
 import android.Manifest;
+import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -93,6 +94,12 @@ public class EditProfile extends Fragment implements UserManagerUserDataUpload {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestMultiplePermissions();
+        getActivity().getSupportFragmentManager().addOnBackStackChangedListener(new androidx.fragment.app.FragmentManager.OnBackStackChangedListener() {
+            @Override
+            public void onBackStackChanged() {
+                Log.d("HELLOP", "afsadfdf");
+            }
+        });
     }
 
     @Override

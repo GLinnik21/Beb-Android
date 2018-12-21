@@ -140,6 +140,7 @@ public class UserManager {
         _currentUser.setEmail(mAuth.getCurrentUser().getEmail());
         _currentUser.setId(mAuth.getUid());
 
+
         String userId = Objects.requireNonNull(mAuth.getCurrentUser()).getUid();
 
         final Boolean[] firstPartLoaded = {false};

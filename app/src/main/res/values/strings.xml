@@ -38,12 +38,12 @@
     <string name="login_screen">Login Screen</string>
     <!-- RSS -->
     <string name="no_internet">No Internet connection</string>
-    <string name="welcome_to_rss">Welcome to RSS Feed!</string>
+    <string name="new_to_rss">Enter RSS feed link</string>
     <string name="feed_loaded">Feed loaded</string>
     <string name="feed_loading_failed">Feed loading failed</string>
     <string name="feed_item_loading_failed">Feed item loading failed</string>
     <string name="feed_loaded_from_cache">Feed loaded from cache</string>
-    <string name="rss_correct_url_request">You need to specify CORRECT link to rss feed</string>
+    <string name="rss_correct_url_request">Enter link to rss feed</string>
     <string name="incorrect_rss_url">Incorrect RssFeed link</string>
     <string name="loading_failed">Loading failed</string>
     <string name="loading">Loading…</string>

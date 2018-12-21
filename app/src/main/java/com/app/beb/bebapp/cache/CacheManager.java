@@ -2,7 +2,7 @@ package com.app.beb.bebapp.cache;
 
 import android.content.Context;
 
-import com.app.beb.bebapp.rss.FeedItem;
+import com.app.beb.bebapp.rss.DashboardItem;
 import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -19,21 +19,22 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CacheRepository {
-    private static CacheRepository instance;
+public class CacheManager {
 
-    private CacheRepository() {
+    // Object lifecycle
+    public static class CacheManagerHolder {
+
+        static final CacheManager HOLDER_INSTANCE = new CacheManager();
+    }
+    public static CacheManager getInstance() {
+        return CacheManagerHolder.HOLDER_INSTANCE;
+    }
+
+    private CacheManager() {
 
     }
 
-    public static CacheRepository getInstance() {
-        if (instance == null) {
-            instance = new CacheRepository();
-        }
-        return instance;
-    }
-
-    public void writeRssToCache(Context context, ArrayList<FeedItem> feedItems, String userUid) {
+    public void writeRssToCache(Context context, ArrayList<DashboardItem> dashboardItems, String userUid) {
         File cacheFile = getTempFile(context, userUid);
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(cacheFile, false);
@@ -42,10 +43,10 @@ public class CacheRepository {
             jsonWriter.beginArray();
             Gson gson = new Gson();
             for (int i = 0; i < 10; i++) {
-                if (i >= feedItems.size()) {
+                if (i >= dashboardItems.size()) {
                     break;
                 }
-                gson.toJson(feedItems.get(i), FeedItem.class, jsonWriter);
+                gson.toJson(dashboardItems.get(i), DashboardItem.class, jsonWriter);
             }
             jsonWriter.endArray();
             jsonWriter.close();
@@ -55,8 +56,8 @@ public class CacheRepository {
         }
     }
 
-    public ArrayList<FeedItem> readRssCache(Context context, String userUid) {
-        ArrayList<FeedItem> feedItems = new ArrayList<>();
+    public ArrayList<DashboardItem> readRssCache(Context context, String userUid) {
+        ArrayList<DashboardItem> dashboardItems = new ArrayList<>();
         File cacheFile = getTempFile(context, userUid);
         try {
             FileInputStream fi = new FileInputStream(cacheFile);
@@ -64,8 +65,8 @@ public class CacheRepository {
             reader.beginArray();
             Gson gson = new Gson();
             while (reader.hasNext()) {
-                FeedItem item = gson.fromJson(reader, FeedItem.class);
-                feedItems.add(item);
+                DashboardItem item = gson.fromJson(reader, DashboardItem.class);
+                dashboardItems.add(item);
             }
             reader.endArray();
 
@@ -74,7 +75,7 @@ public class CacheRepository {
         } catch (IOException e) {
             System.out.println("Error initializing stream");
         }
-        return feedItems;
+        return dashboardItems;
     }
 
     private File getTempFile(Context context, String fileName) {
@@ -93,7 +94,7 @@ public class CacheRepository {
 
     private void removeTempFile(Context context, String fileName) {
         File cacheFile = new File(context.getCacheDir(), fileName);
-        if (cacheFile != null && cacheFile.exists()) {
+        if (cacheFile.exists()) {
             cacheFile.delete();
         }
     }
@@ -103,16 +104,16 @@ public class CacheRepository {
     }
 
     class JsonFeedItemsAdapter {
-        public List<FeedItem> getFeedItems() {
-            return feedItems;
+        public List<DashboardItem> getDashboardItems() {
+            return dashboardItems;
         }
 
-        public void setFeedItems(List<FeedItem> feedItems) {
-            this.feedItems = feedItems;
+        public void setDashboardItems(List<DashboardItem> dashboardItems) {
+            this.dashboardItems = dashboardItems;
         }
 
-        @SerializedName("feedItems")
+        @SerializedName("dashboardItems")
         @Expose
-        private List<FeedItem> feedItems;
+        private List<DashboardItem> dashboardItems;
     }
 }

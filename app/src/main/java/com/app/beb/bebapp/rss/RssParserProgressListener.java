@@ -1,6 +1,6 @@
 package com.app.beb.bebapp.rss;
 
-public interface RssReaderProgressListener {
+public interface RssParserProgressListener {
     void onProgressStarted();
     void onProgressEnded();
 }

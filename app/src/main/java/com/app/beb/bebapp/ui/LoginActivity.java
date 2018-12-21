@@ -4,7 +4,9 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 
 import androidx.annotation.NonNull;
@@ -311,6 +313,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         showProgress(false);
         if (successfully) {
             Log.d("STATUS", "signInWithEmail:success");
+            setLastUserUidPreference(UserManager.getInstance().getCurrentUser().getId());
             goToMainActivity();
         } else {
             Log.w("STATUS", "signInWithEmail:failure");
@@ -324,12 +327,20 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         showProgress(false);
         if (successfully) {
             Log.d("STATUS", "createUserWithEmail:success");
+            setLastUserUidPreference(UserManager.getInstance().getCurrentUser().getId());
             goToMainActivity();
         } else {
             Log.w("STATUS", "createUserWithEmail:failure");
             Toast.makeText(LoginActivity.this, "Authentication failed.",
                     Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void setLastUserUidPreference(String uid) {
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(getString(R.string.preference_last_userId), uid);
+        editor.commit();
     }
 
     private interface ProfileQuery {

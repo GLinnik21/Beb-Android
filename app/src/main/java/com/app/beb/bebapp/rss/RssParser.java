@@ -20,18 +20,18 @@ import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-public class RssReader extends AsyncTask<Void, Void, Void>  {
+public class RssParser extends AsyncTask<Void, Void, Void>  {
 
     protected String address;
-    protected ArrayList<FeedItem> feedItems;
+    protected ArrayList<DashboardItem> dashboardItems;
     protected URL url;
 
-    public RssReader(Context context,  String address) {
+    public RssParser(Context context, String address) {
         this.address = address;
-        feedItems = new ArrayList<FeedItem>();
+        dashboardItems = new ArrayList<DashboardItem>();
         onItemsLoadedListeners = new ArrayList<>();
         rssReaderFeedItemLoadedListeners = new ArrayList<>();
-        rssReaderProgressListeners = new ArrayList<>();
+        rssParserProgressListeners = new ArrayList<>();
     }
 
     @Override
@@ -52,25 +52,25 @@ public class RssReader extends AsyncTask<Void, Void, Void>  {
         void onItemsLoaded();
         void onItemsLoadFailed(Exception e);
     }
-    private ArrayList<RssReaderProgressListener> rssReaderProgressListeners;
-    public void addOnProgressListener(RssReaderProgressListener listener) {
-        if (!rssReaderProgressListeners.contains(listener)) {
-            rssReaderProgressListeners.add(listener);
+    private ArrayList<RssParserProgressListener> rssParserProgressListeners;
+    public void addOnProgressListener(RssParserProgressListener listener) {
+        if (!rssParserProgressListeners.contains(listener)) {
+            rssParserProgressListeners.add(listener);
         }
     }
 
-    public void removeOnProgressListener(RssReaderProgressListener listener) {
-        rssReaderProgressListeners.remove(listener);
+    public void removeOnProgressListener(RssParserProgressListener listener) {
+        rssParserProgressListeners.remove(listener);
     }
 
     public void notifyOnProgressStarted() {
-        for (RssReaderProgressListener listener: rssReaderProgressListeners) {
+        for (RssParserProgressListener listener: rssParserProgressListeners) {
             listener.onProgressStarted();
         }
     }
 
     public void notifyOnProgressEnded() {
-        for (RssReaderProgressListener listener: rssReaderProgressListeners) {
+        for (RssParserProgressListener listener: rssParserProgressListeners) {
             listener.onProgressEnded();
         }
     }
@@ -102,7 +102,7 @@ public class RssReader extends AsyncTask<Void, Void, Void>  {
     }
 
     public interface RssReaderFeedItemLoadedListener {
-        void onFeedItemLoaded(FeedItem item);
+        void onFeedItemLoaded(DashboardItem item);
         void onFeedItemLoadFailed(Exception e);
     }
 
@@ -117,7 +117,7 @@ public class RssReader extends AsyncTask<Void, Void, Void>  {
         rssReaderFeedItemLoadedListeners.remove(listener);
     }
 
-    private void notifyOnFeedItemLoaded(FeedItem item) {
+    private void notifyOnFeedItemLoaded(DashboardItem item) {
 
         for (RssReaderFeedItemLoadedListener listener: rssReaderFeedItemLoadedListeners) {
             listener.onFeedItemLoaded(item);
@@ -146,32 +146,29 @@ public class RssReader extends AsyncTask<Void, Void, Void>  {
         for (int i = 0; i < items.getLength(); i++) {
             Node item = items.item(i);
             if (item.getNodeName().equalsIgnoreCase("item")) {
-                FeedItem feedItem = new FeedItem();
+                DashboardItem dashboardItem = new DashboardItem();
                 NodeList itemChildNodes = item.getChildNodes();
                 for (int j = 0; j < itemChildNodes.getLength(); j++) {
                     Node node = itemChildNodes.item(j);
                     if (node.getNodeName().equalsIgnoreCase("title")) {
-                        feedItem.setTitle(node.getTextContent());
+                        dashboardItem.setTitle(node.getTextContent());
                     } else if (node.getNodeName().equalsIgnoreCase("pubDate")) {
-                        feedItem.setPubDate(node.getTextContent());
+                        dashboardItem.setPubDate(node.getTextContent());
                     } else if (node.getNodeName().equalsIgnoreCase("link")) {
-                        feedItem.setLink(node.getTextContent());
+                        dashboardItem.setLink(node.getTextContent());
                     } else if (node.getNodeName().equalsIgnoreCase("media:thumbnail")
                             || node.getNodeName().equalsIgnoreCase("media:content")) {
                         String url = node.getAttributes().item(0).getTextContent();
-                        feedItem.setThumbnailUrl(url);
+                        dashboardItem.setThumbnailUrl(url);
                     }else if (node.getNodeName().equalsIgnoreCase("description")) {
                         String content = node.getTextContent();
-                        Pattern pattern = Pattern.compile("img\\s*src=(\\\".*?\\\")");
-                        Matcher matcher = pattern.matcher(content);
-                        if (matcher.matches()) {
-                            String str = matcher.toMatchResult().group();
-                        }
-                        feedItem.setDescription(content);
+                        String regexp = "<[^>]*>";
+                        content = content.replaceAll(regexp, "");
+                        dashboardItem.setDescription(content);
                     }
                 }
-                feedItems.add(feedItem);
-                notifyOnFeedItemLoaded(feedItem);
+                dashboardItems.add(dashboardItem);
+                notifyOnFeedItemLoaded(dashboardItem);
             }
         }
         notifyOnItemsLoaded();

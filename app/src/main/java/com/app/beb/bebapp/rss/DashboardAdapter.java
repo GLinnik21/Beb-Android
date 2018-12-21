@@ -1,6 +1,7 @@
 package com.app.beb.bebapp.rss;
 
 import android.content.Context;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,40 +16,40 @@ import java.util.ArrayList;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.MyViewHolder> {
-    public ArrayList<FeedItem> getFeedItems() {
-        return feedItems;
+public class DashboardAdapter extends RecyclerView.Adapter<DashboardAdapter.MyViewHolder> {
+    public ArrayList<DashboardItem> getDashboardItems() {
+        return dashboardItems;
     }
 
-    public void setFeedItems(ArrayList<FeedItem> feedItems) {
-        this.feedItems = feedItems;
+    public void setDashboardItems(ArrayList<DashboardItem> dashboardItems) {
+        this.dashboardItems = dashboardItems;
         this.notifyDataSetChanged();
     }
 
-    protected ArrayList<FeedItem> feedItems;
+    protected ArrayList<DashboardItem> dashboardItems;
     protected Context context;
     private OnItemClickListener onItemClickListener;
 
-    public FeedsAdapter(Context context, ArrayList<FeedItem>feedItems, OnItemClickListener listener){
-        this.feedItems=feedItems;
+    public DashboardAdapter(Context context, ArrayList<DashboardItem> dashboardItems, OnItemClickListener listener){
+        this.dashboardItems = dashboardItems;
         this.context=context;
         this.onItemClickListener = listener;
     }
 
     @NonNull
     @Override
-    public FeedsAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public DashboardAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view= LayoutInflater.from(context).inflate(R.layout.news_list_item, parent,false);
         MyViewHolder holder=new MyViewHolder(view);
         return holder;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull FeedsAdapter.MyViewHolder holder, int position) {
-        FeedItem item = feedItems.get(position);
+    public void onBindViewHolder(@NonNull DashboardAdapter.MyViewHolder holder, int position) {
+        DashboardItem item = dashboardItems.get(position);
 
-        holder.Title.setText(item.getTitle());
-        holder.Description.setText(item.getDescription());
+        holder.Title.setText(Html.fromHtml(item.getTitle()));
+        holder.Description.setText(Html.fromHtml(item.getDescription()));
         holder.Date.setText(item.getPubDate());
         Glide
                 .with(context)
@@ -59,11 +60,11 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.MyViewHolder
 
     @Override
     public int getItemCount() {
-        return feedItems.size();
+        return dashboardItems.size();
     }
 
-    public void addItem(FeedItem item) {
-        feedItems.add(item);
+    public void addItem(DashboardItem item) {
+        dashboardItems.add(item);
         this.notifyDataSetChanged();
     }
 
@@ -80,7 +81,7 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.MyViewHolder
             Thumbnail= itemView.findViewById(R.id.thumb_img);
         }
 
-        public void setOnClickListener(final OnItemClickListener listener, final FeedItem item) {
+        public void setOnClickListener(final OnItemClickListener listener, final DashboardItem item) {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -91,6 +92,6 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.MyViewHolder
     }
 
     public interface OnItemClickListener{
-        void onItemClick(FeedItem item);
+        void onItemClick(DashboardItem item);
     }
 }

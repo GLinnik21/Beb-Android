@@ -3,7 +3,7 @@ package com.app.beb.bebapp.rss;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class FeedItem {
+public class DashboardItem {
     public String getTitle() {
         return title;
     }

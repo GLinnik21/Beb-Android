@@ -19,13 +19,14 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.app.beb.bebapp.R;
-import com.app.beb.bebapp.cache.CacheRepository;
-import com.app.beb.bebapp.rss.FeedItem;
-import com.app.beb.bebapp.rss.FeedsAdapter;
-import com.app.beb.bebapp.rss.RssReader;
-import com.app.beb.bebapp.rss.RssReaderProgressListener;
+import com.app.beb.bebapp.cache.CacheManager;
+import com.app.beb.bebapp.rss.DashboardItem;
+import com.app.beb.bebapp.rss.DashboardAdapter;
+import com.app.beb.bebapp.rss.RssParser;
+import com.app.beb.bebapp.rss.RssParserProgressListener;
 import com.app.beb.bebapp.user_manager.UserManager;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 
@@ -35,23 +36,22 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class Dashboard extends Fragment implements RssReader.RssReaderFeedItemLoadedListener,
-        RssReader.OnItemsLoadedListener, RssReaderProgressListener {
+public class Dashboard extends Fragment implements RssParser.RssReaderFeedItemLoadedListener,
+        RssParser.OnItemsLoadedListener, RssParserProgressListener {
 
 
     private RecyclerView recyclerView;
-    private FeedsAdapter feedsAdapter;
-    private RssReader rssReader;
+    private DashboardAdapter dashboardAdapter;
+    private RssParser rssParser;
     private ProgressDialog progressDialog;
     private boolean loadedFromCache = false;
-    FeedsAdapter.OnItemClickListener onItemClickListener;
+    private DashboardAdapter.OnItemClickListener onItemClickListener;
+
+    private SharedPreferences sharedPref;
 
     public Dashboard() {
         // Required empty public constructor
     }
-
-
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -66,19 +66,32 @@ public class Dashboard extends Fragment implements RssReader.RssReaderFeedItemLo
         return inflater.inflate(R.layout.fragment_dashboard, container, false);
     }
 
+    public boolean isOnline() {
+        Runtime runtime = Runtime.getRuntime();
+        try {
+            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
+            int     exitValue = ipProcess.waitFor();
+            return (exitValue == 0);
+        }
+        catch (IOException e)          { e.printStackTrace(); }
+        catch (InterruptedException e) { e.printStackTrace(); }
+
+        return false;
+    }
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        recyclerView = view.findViewById(R.id.news__recyclerView);
+        recyclerView = view.findViewById(R.id.dashboard_recyclerView);
         int orientation = getContext().getResources().getConfiguration().orientation;
 
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), orientation));
 
-        onItemClickListener = new FeedsAdapter.OnItemClickListener() {
+        onItemClickListener = new DashboardAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(FeedItem item) {
-                if (!loadedFromCache) {
-                    Intent intent = new Intent(getContext(), RssWebView.class);
+            public void onItemClick(DashboardItem item) {
+                if (isOnline()) {
+                    Intent intent = new Intent(getContext(), RssWebViewActivity.class);
                     intent.putExtra("URL", item.getLink());
                     startActivity(intent);
                 } else {
@@ -86,13 +99,13 @@ public class Dashboard extends Fragment implements RssReader.RssReaderFeedItemLo
                 }
             }
         };
-        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+        sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
         String lastUserId = sharedPref.getString(getString(R.string.preference_last_userId), null);
         String rssUrl = sharedPref.getString(getString(R.string.preference_rssUrl), null);
-        if (lastUserId == null){
-            askToInputNewUrl(getString(R.string.welcome_to_rss));
-        } else if (!lastUserId.equals(UserManager.getInstance())) {
-            askToInputNewUrl(getString(R.string.welcome_to_rss));
+        if (lastUserId == null) {
+            askToInputNewUrl(getString(R.string.new_to_rss));
+        } else if (!lastUserId.equals(UserManager.getInstance().getCurrentUser().getId())) {
+            askToInputNewUrl(getString(R.string.new_to_rss));
         } else {
             doRss(rssUrl);
         }
@@ -111,10 +124,10 @@ public class Dashboard extends Fragment implements RssReader.RssReaderFeedItemLo
     }
 
     private void doRss(String address) {
-        feedsAdapter = new FeedsAdapter(getContext(), new ArrayList<FeedItem>(), onItemClickListener);
-        recyclerView.setAdapter(feedsAdapter);
+        dashboardAdapter = new DashboardAdapter(getContext(), new ArrayList<DashboardItem>(), onItemClickListener);
+        recyclerView.setAdapter(dashboardAdapter);
         ConnectivityManager cm =
-                (ConnectivityManager)getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+                (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         boolean isConnected = activeNetwork != null &&
@@ -126,19 +139,19 @@ public class Dashboard extends Fragment implements RssReader.RssReaderFeedItemLo
         }
     }
 
-    private void loadRssFromTheInternet(String address){
-        rssReader = new RssReader(getContext(), address);
-        rssReader.addOnFeedItemLoadedListener(this);
-        rssReader.addOnExecutedListener(this);
-        rssReader.addOnProgressListener(this);
-        rssReader.execute();
+    private void loadRssFromTheInternet(String address) {
+        rssParser = new RssParser(getContext(), address);
+        rssParser.addOnFeedItemLoadedListener(this);
+        rssParser.addOnExecutedListener(this);
+        rssParser.addOnProgressListener(this);
+        rssParser.execute();
     }
 
     private void loadRssFromCache() {
         loadedFromCache = true;
-        ArrayList<FeedItem> items = CacheRepository.getInstance().readRssCache(getContext(),
+        ArrayList<DashboardItem> items = CacheManager.getInstance().readRssCache(getContext(),
                 UserManager.getInstance().getCurrentUser().getId());
-        feedsAdapter.setFeedItems(items);
+        dashboardAdapter.setDashboardItems(items);
         Toast.makeText(getContext(), R.string.feed_loaded_from_cache, Toast.LENGTH_SHORT).show();
     }
 
@@ -150,7 +163,7 @@ public class Dashboard extends Fragment implements RssReader.RssReaderFeedItemLo
                 .setTitle(title)
                 .setPositiveButton("OK",
                         new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,int id) {
+                            public void onClick(DialogInterface dialog, int id) {
                                 showRssSourceInputDialog();
                             }
                         })
@@ -174,14 +187,13 @@ public class Dashboard extends Fragment implements RssReader.RssReaderFeedItemLo
 
         builder.setView(dialogView);
 
-        final EditText sourceInput = (EditText) dialogView
-                .findViewById(R.id.rssSourseInputDialog__editText);
+        final EditText sourceInput = dialogView.findViewById(R.id.rssSourseInputDialog__editText);
+        sourceInput.setText(sharedPref.getString(getString(R.string.preference_rssUrl), null));
 
-        builder
-                .setCancelable(false)
+        builder.setCancelable(false)
                 .setPositiveButton(R.string.ok,
                         new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,int id) {
+                            public void onClick(DialogInterface dialog, int id) {
                                 String url = sourceInput.getText().toString();
                                 setRssUrlPreference(url);
                                 doRss(url);
@@ -189,7 +201,7 @@ public class Dashboard extends Fragment implements RssReader.RssReaderFeedItemLo
                         })
                 .setNegativeButton(R.string.cancel,
                         new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,int id) {
+                            public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
                             }
                         });
@@ -199,11 +211,11 @@ public class Dashboard extends Fragment implements RssReader.RssReaderFeedItemLo
     }
 
     @Override
-    public void onFeedItemLoaded(final FeedItem item) {
+    public void onFeedItemLoaded(final DashboardItem item) {
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                feedsAdapter.addItem(item);
+                dashboardAdapter.addItem(item);
             }
         });
 
@@ -220,13 +232,6 @@ public class Dashboard extends Fragment implements RssReader.RssReaderFeedItemLo
 
     }
 
-    private void setLastUserUidPreference(String uid) {
-        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString(getString(R.string.preference_last_userId), uid);
-        editor.commit();
-    }
-
     private void setRssUrlPreference(String url) {
         SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
@@ -241,8 +246,7 @@ public class Dashboard extends Fragment implements RssReader.RssReaderFeedItemLo
             public void run() {
                 Toast.makeText(getContext(), R.string.feed_loaded, Toast.LENGTH_LONG).show();
                 String uid = UserManager.getInstance().getCurrentUser().getId();
-                setLastUserUidPreference(uid);
-                CacheRepository.getInstance().writeRssToCache(getContext(), feedsAdapter.getFeedItems(), uid);
+                CacheManager.getInstance().writeRssToCache(getContext(), dashboardAdapter.getDashboardItems(), uid);
             }
         });
 
@@ -284,7 +288,6 @@ public class Dashboard extends Fragment implements RssReader.RssReaderFeedItemLo
             progressDialog.hide();
         }
     }
-
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
