@@ -1,20 +1,20 @@
-package com.app.beb.bebapp;
+package com.app.beb.bebapp.ui;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 
 import androidx.annotation.NonNull;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.app.beb.bebapp.R;
+import com.app.beb.bebapp.user_manager.UserManager;
+import com.app.beb.bebapp.user_manager.UserManagerLoginListener;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -313,6 +313,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         showProgress(false);
         if (successfully) {
             Log.d("STATUS", "signInWithEmail:success");
+            setLastUserUidPreference(UserManager.getInstance().getCurrentUser().getId());
             goToMainActivity();
         } else {
             Log.w("STATUS", "signInWithEmail:failure");
@@ -326,12 +327,20 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         showProgress(false);
         if (successfully) {
             Log.d("STATUS", "createUserWithEmail:success");
+            setLastUserUidPreference(UserManager.getInstance().getCurrentUser().getId());
             goToMainActivity();
         } else {
             Log.w("STATUS", "createUserWithEmail:failure");
             Toast.makeText(LoginActivity.this, "Authentication failed.",
                     Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void setLastUserUidPreference(String uid) {
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(getString(R.string.preference_last_userId), uid);
+        editor.commit();
     }
 
     private interface ProfileQuery {

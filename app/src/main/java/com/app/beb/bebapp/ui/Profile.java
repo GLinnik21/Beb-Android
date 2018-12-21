@@ -1,4 +1,4 @@
-package com.app.beb.bebapp;
+package com.app.beb.bebapp.ui;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,6 +9,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.app.beb.bebapp.R;
+import com.app.beb.bebapp.user_manager.User;
+import com.app.beb.bebapp.user_manager.UserManager;
+import com.app.beb.bebapp.user_manager.UserManagerDataListener;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

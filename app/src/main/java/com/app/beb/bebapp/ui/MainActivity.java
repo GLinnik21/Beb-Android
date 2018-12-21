@@ -1,23 +1,22 @@
-package com.app.beb.bebapp;
+package com.app.beb.bebapp.ui;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+
+import com.app.beb.bebapp.R;
+import com.app.beb.bebapp.user_manager.UserManager;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.annotation.NonNull;
-
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.firebase.auth.FirebaseAuth;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
-
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 
 import static androidx.navigation.ui.NavigationUI.setupWithNavController;
 
@@ -44,13 +43,6 @@ public class MainActivity extends AppCompatActivity implements NavController.OnN
         setSupportActionBar(_mainToolbar);
     }
 
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.appbar, menu);
-        _menu = menu;
-        return true;
-    }
-
     @SuppressLint("ResourceType")
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
@@ -63,6 +55,13 @@ public class MainActivity extends AppCompatActivity implements NavController.OnN
         }
 
         return super.onPrepareOptionsMenu(menu);
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.appbar, menu);
+        _menu = menu;
+        return true;
     }
 
     @Override
@@ -84,11 +83,6 @@ public class MainActivity extends AppCompatActivity implements NavController.OnN
     }
 
     @Override
-    public boolean onSupportNavigateUp() {
-        return _navController.navigateUp();
-    }
-
-    @Override
     public void onNavigated(@NonNull NavController controller, @NonNull NavDestination destination) {
         switch (destination.getId()) {
             case R.id.profile:
@@ -101,3 +95,4 @@ public class MainActivity extends AppCompatActivity implements NavController.OnN
         invalidateOptionsMenu();
     }
 }
+

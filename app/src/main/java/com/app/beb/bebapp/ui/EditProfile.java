@@ -1,6 +1,7 @@
-package com.app.beb.bebapp;
+package com.app.beb.bebapp.ui;
 
 import android.Manifest;
+import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -19,6 +20,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.app.beb.bebapp.R;
+import com.app.beb.bebapp.user_manager.User;
+import com.app.beb.bebapp.user_manager.UserManager;
+import com.app.beb.bebapp.user_manager.UserManagerUserDataUpload;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputLayout;
 import com.karumi.dexter.Dexter;
@@ -57,21 +62,44 @@ public class EditProfile extends Fragment implements UserManagerUserDataUpload {
 
     private String newPicAbsolutePath;
 
+    private final String NAME = "NAME_KEY";
+    private final String SURNAME = "SURNAME_KEY";
+    private final String PHONE = "PHONE_KEY";
+
     public EditProfile() {
         // Required empty public constructor
     }
 
-    public static EditProfile newInstance() {
-        EditProfile fragment = new EditProfile();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+
+        savedInstanceState.putString(NAME, nameTextInput.getEditText().getText().toString());
+        savedInstanceState.putString(SURNAME, surnameTextInput.getEditText().getText().toString());
+        savedInstanceState.putString(PHONE, phoneTextInput.getEditText().getText().toString());
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            nameTextInput.getEditText().setText(savedInstanceState.getString(NAME));
+            surnameTextInput.getEditText().setText(savedInstanceState.getString(SURNAME));
+            phoneTextInput.getEditText().setText(savedInstanceState.getString(PHONE));
+        }
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestMultiplePermissions();
+        getActivity().getSupportFragmentManager().addOnBackStackChangedListener(new androidx.fragment.app.FragmentManager.OnBackStackChangedListener() {
+            @Override
+            public void onBackStackChanged() {
+                Log.d("HELLOP", "afsadfdf");
+            }
+        });
     }
 
     @Override
@@ -164,7 +192,7 @@ public class EditProfile extends Fragment implements UserManagerUserDataUpload {
             UserManager.getInstance().setDataUploadListener(this);
             UserManager.getInstance().overrideCurrentUser(user);
             dialog = ProgressDialog.show(getActivity(), "",
-                    "Loading. Please wait...", true);
+                    getContext().getString(R.string.loading), true);
         } else {
             Navigation.findNavController(getView()).navigateUp();
         }

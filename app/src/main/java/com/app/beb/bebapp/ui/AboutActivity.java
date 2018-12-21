@@ -1,4 +1,4 @@
-package com.app.beb.bebapp;
+package com.app.beb.bebapp.ui;
 
 import android.Manifest;
 import android.content.Context;
@@ -16,7 +16,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.widget.TextView;
 
-import java.util.Objects;
+import com.app.beb.bebapp.BuildConfig;
+import com.app.beb.bebapp.R;
 
 public class AboutActivity extends AppCompatActivity {
 

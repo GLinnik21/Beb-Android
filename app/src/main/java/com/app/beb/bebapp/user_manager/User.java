@@ -1,4 +1,4 @@
-package com.app.beb.bebapp;
+package com.app.beb.bebapp.user_manager;
 
 public class User {
     private String name;
@@ -6,6 +6,7 @@ public class User {
     private String phone;
     private String email;
     private String profilePicPath;
+    private String id;
 
     public User() {
 
@@ -49,5 +50,13 @@ public class User {
 
     public void setProfilePicPath(String profilePicPath) {
         this.profilePicPath = profilePicPath;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

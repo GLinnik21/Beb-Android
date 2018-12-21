@@ -36,10 +36,23 @@
         completions."
     </string>
     <string name="login_screen">Login Screen</string>
+    <!-- RSS -->
+    <string name="no_internet">No Internet connection</string>
+    <string name="new_to_rss">Enter RSS feed link</string>
+    <string name="feed_loaded">Feed loaded</string>
+    <string name="feed_loading_failed">Feed loading failed</string>
+    <string name="feed_item_loading_failed">Feed item loading failed</string>
+    <string name="feed_loaded_from_cache">Feed loaded from cache</string>
+    <string name="rss_correct_url_request">Enter link to rss feed</string>
+    <string name="incorrect_rss_url">Incorrect RssFeed link</string>
+    <string name="loading_failed">Loading failed</string>
+    <string name="loading">Loading…</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="change_rss_source">Change RSS source</string>
+    <!-- Feed adapter -->
+
     <!-- Shared preferences -->
-    <string name="user_id_prefs_key">user_id_prefs_key</string>
-    <string name="phone_prefs_key">phone_prefs_key</string>
-    <string name="name_prefs_key">name_prefs_key</string>
-    <string name="surname_prefs_key">surname_prefs_key</string>
-    <string name="profile_pic_uri_prefs_key">profile_pic_uri_prefs_key</string>
+    <string name="preference_last_userId">last_userId</string>
+    <string name="preference_rssUrl">rssUrl</string>
 </resources>
